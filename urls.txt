@@ -1,5 +1,28 @@
 # One URL per line
 
 https://geniuskala.com/
-https://geniuskala.com/shop/
-https://geniuskala.com/product/%da%a9%d9%84%db%8c%d8%af-%d9%84%d9%85%d8%b3%db%8c-%d9%87%d9%88%d8%b4%d9%85%d9%86%d8%af-%d8%b3%d9%88%d9%86%d9%88%d9%81-t1eu3c/
+https://geniuskala.com/shop
+https://geniuskala.com/product/%d8%a7%d8%b3%d9%be%db%8c%da%a9%d8%b1-%d8%b3%d9%82%d9%81%db%8c-%d9%85%d8%af%d9%84-sp618/
+https://geniuskala.com/product/%d8%a7%d8%b3%d9%be%db%8c%da%a9%d8%b1-%d8%b3%d9%82%d9%81%db%8c-%d9%85%d8%af%d9%84-sp301/
+https://geniuskala.com/product/%d8%a7%d8%b3%d9%be%db%8c%da%a9%d8%b1-%d8%b3%d9%82%d9%81%db%8c-%d9%85%d8%af%d9%84-sp41/
+
+https://geniuskala.com/product-category/دستگیره-هوشمند/
+
+https://geniuskala.com/product-category/سیستم-صوتی/
+https://geniuskala.com/product-category/سیستم-صوتی/اسپیکر/
+https://geniuskala.com/product-category/سیستم-صوتی/آمپلی-فایر/
+https://geniuskala.com/product-category/سیستم-صوتی/تاچ-پنل-صوتی/
+https://geniuskala.com/product-category/سیستم-صوتی/مولتی-مدیا/
+
+https://geniuskala.com/product-category/کلید-و-پریز/
+https://geniuskala.com/product-category/کلید-و-پریز/کلید-هوشمند/
+https://geniuskala.com/product-category/کلید-و-پریز/پریز-هوشمند/
+
+https://geniuskala.com/product-category/آیفون-تصویری/
+
+https://geniuskala.com/product-category/تجهیزات-برق-صنعتی/
+https://geniuskala.com/product-category/تجهیزات-برق-صنعتی/اینورتر/
+
+https://geniuskala.com/product-category/سیستم-امنیتی/
+
+https://geniuskala.com/product-category/تجهیزات-شبکه/
