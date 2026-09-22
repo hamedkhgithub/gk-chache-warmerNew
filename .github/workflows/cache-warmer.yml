@@ -3,42 +3,35 @@ name: GeniusKala Cache Warmer
 on:
   workflow_dispatch:
     inputs:
-      mode:
-        description: Browser profile
+      device:
+        description: "Device cache"
         required: true
-        default: both
+        default: "both"
         type: choice
-        options:
-          - both
-          - mobile
-          - desktop
-
+        options: [both, mobile, desktop]
+      navigation:
+        description: "Navigation type"
+        required: true
+        default: "both"
+        type: choice
+        options: [both, direct, internal]
       auth:
-        description: Cache view to warm
+        description: "User state"
         required: true
-        default: both
+        default: "both"
         type: choice
-        options:
-          - both
-          - guest
-          - logged_in
-
+        options: [both, guest, logged_in]
       delay:
-        description: Seconds between URLs
+        description: "Seconds between URLs"
         required: true
         default: "5"
         type: string
-
       verify_delay:
-        description: Seconds before HIT verification
+        description: "Seconds before verification"
         required: true
         default: "2"
         type: string
 
-  # GitHub cron uses UTC.
-  # Scheduled run remains GUEST by default so it never fails if login secrets
-  # are not configured. Change AUTH fallback below to "both" after adding secrets
-  # if you want scheduled logged-in warming too.
   schedule:
     - cron: "30 0 * * *"
 
@@ -52,43 +45,41 @@ concurrency:
 jobs:
   warm-cache:
     runs-on: ubuntu-latest
-    timeout-minutes: 60
+    timeout-minutes: 90
     env:
       PYTHONUNBUFFERED: "1"
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
+      - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-          cache: pip
+          cache: "pip"
 
-      - name: Install dependencies
-        run: pip install -r requirements.txt
+      - run: pip install -r requirements.txt
 
       - name: Run cache warmer
         shell: bash
         env:
-          GK_WP_USERNAME: ${{ secrets.GK_WP_USERNAME }}
-          GK_WP_PASSWORD: ${{ secrets.GK_WP_PASSWORD }}
+          GK_LOGIN_COOKIES: ${{ secrets.GK_LOGIN_COOKIES }}
         run: |
-          MODE="${{ github.event.inputs.mode || 'both' }}"
+          DEVICE="${{ github.event.inputs.device || 'both' }}"
+          NAVIGATION="${{ github.event.inputs.navigation || 'both' }}"
           AUTH="${{ github.event.inputs.auth || 'guest' }}"
           DELAY="${{ github.event.inputs.delay || '5' }}"
           VERIFY_DELAY="${{ github.event.inputs.verify_delay || '2' }}"
 
           python -u crawler.py \
             --file urls.txt \
-            --mode "$MODE" \
+            --device "$DEVICE" \
+            --navigation "$NAVIGATION" \
             --auth "$AUTH" \
             --delay "$DELAY" \
             --verify-delay "$VERIFY_DELAY" \
-            --timeout 45
+            --timeout 60
 
-      - name: Upload crawler report
+      - name: Upload report
         if: always()
         uses: actions/upload-artifact@v4
         with:
