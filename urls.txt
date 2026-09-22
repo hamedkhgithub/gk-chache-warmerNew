@@ -1,0 +1,6 @@
+# One GeniusKala URL per line.
+# Add or remove URLs whenever needed.
+# Lines beginning with # are ignored.
+
+https://geniuskala.com/
+https://geniuskala.com/shop/
