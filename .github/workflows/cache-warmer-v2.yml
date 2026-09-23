@@ -1,0 +1,97 @@
+name: GeniusKala Cache Warmer
+
+on:
+  workflow_dispatch:
+    inputs:
+      device:
+        description: "Device cache"
+        required: true
+        default: "both"
+        type: choice
+        options: [both, mobile, desktop]
+      navigation:
+        description: "Navigation type"
+        required: true
+        default: "both"
+        type: choice
+        options: [both, direct, internal]
+      auth:
+        description: "User state"
+        required: true
+        default: "both"
+        type: choice
+        options: [both, guest, logged_in]
+      source:
+        description: "URL source"
+        required: true
+        default: "file"
+        type: choice
+        options: [file, interactive]
+      delay:
+        description: "Seconds between URLs"
+        required: true
+        default: "5"
+        type: string
+      verify_delay:
+        description: "Seconds before verification"
+        required: true
+        default: "2"
+        type: string
+
+  schedule:
+    - cron: "30 0 * * *"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: geniuskala-cache-warmer
+  cancel-in-progress: false
+
+jobs:
+  warm-cache:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    env:
+      PYTHONUNBUFFERED: "1"
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: "pip"
+
+      - run: pip install -r requirements.txt
+
+      - name: Run cache warmer
+        shell: bash
+        env:
+          GK_LOGIN_COOKIES: ${{ secrets.GK_LOGIN_COOKIES }}
+        run: |
+          DEVICE="${{ github.event.inputs.device || 'both' }}"
+          NAVIGATION="${{ github.event.inputs.navigation || 'both' }}"
+          AUTH="${{ github.event.inputs.auth || 'guest' }}"
+          SOURCE="${{ github.event.inputs.source || 'interactive' }}"
+          DELAY="${{ github.event.inputs.delay || '5' }}"
+          VERIFY_DELAY="${{ github.event.inputs.verify_delay || '2' }}"
+
+          python -u crawler.py \
+            --source "$SOURCE" \
+            --file urls.txt \
+            --device "$DEVICE" \
+            --navigation "$NAVIGATION" \
+            --auth "$AUTH" \
+            --delay "$DELAY" \
+            --verify-delay "$VERIFY_DELAY" \
+            --timeout 60
+
+      - name: Upload report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cache-warmer-report-${{ github.run_number }}
+          path: logs/
+          if-no-files-found: ignore
+          retention-days: 14
