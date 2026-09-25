@@ -167,8 +167,6 @@ def main():
                                 if not ok:
                                     failures+=1
 
-                                log(f"  {label:30} VERIFY SKIPPED | {result}")
-
                                 w.writerow({
                                     "utc_time":datetime.now(timezone.utc).isoformat(),
                                     "index":i,
