@@ -4,14 +4,14 @@ on:
   workflow_dispatch:
     inputs:
       urls:
-        description: "Paste URLs here - one per line"
+        description: "Paste URLs here"
         required: true
         type: string
 
       device:
         description: "Device cache"
         required: true
-        default: "mobile"
+        default: "both"
         type: choice
         options:
           - both
@@ -21,7 +21,7 @@ on:
       navigation:
         description: "Navigation type"
         required: true
-        default: "internal"
+        default: "direct"
         type: choice
         options:
           - direct
@@ -51,37 +51,53 @@ jobs:
   warm-cache:
     runs-on: ubuntu-latest
     timeout-minutes: 90
+
     env:
       PYTHONUNBUFFERED: "1"
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
 
-      - uses: actions/setup-python@v5
+      - name: Setup Python
+        uses: actions/setup-python@v5
         with:
           python-version: "3.12"
           cache: "pip"
 
-      - run: pip install -r requirements.txt
+      - name: Install requirements
+        run: pip install -r requirements.txt
 
       - name: Prepare URLs
         shell: bash
         env:
-          INPUT_URLS: ${{ github.event.inputs.urls }}
+          INPUT_URLS: ${{ inputs.urls }}
         run: |
-          printf '%s\n' "$INPUT_URLS" > runtime-urls.txt
-          echo "URL count: $(grep -cvE '^[[:space:]]*(#|$)' runtime-urls.txt)"
+          python - <<'PY'
+          import os, re
+
+          text = os.environ.get("INPUT_URLS", "")
+          urls = re.findall(r'https?://\S+', text)
+
+          with open("runtime-urls.txt", "w", encoding="utf-8") as f:
+              for url in urls:
+                  f.write(url.strip() + "\n")
+
+          print("URL count:", len(urls))
+          for url in urls:
+              print(url)
+          PY
 
       - name: Run cache warmer
         shell: bash
         run: |
           python -u crawler.py \
             --file runtime-urls.txt \
-            --device "${{ github.event.inputs.device }}" \
-            --navigation "${{ github.event.inputs.navigation }}" \
+            --device "${{ inputs.device }}" \
+            --navigation "${{ inputs.navigation }}" \
             --auth guest \
-            --delay "${{ github.event.inputs.delay }}" \
-            --verify-delay "${{ github.event.inputs.verify_delay }}" \
+            --delay "${{ inputs.delay }}" \
+            --verify-delay "${{ inputs.verify_delay }}" \
             --timeout 60
 
       - name: Upload report
