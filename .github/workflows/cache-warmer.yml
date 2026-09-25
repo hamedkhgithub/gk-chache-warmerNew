@@ -21,12 +21,18 @@ on:
       navigation:
         description: "Navigation type"
         required: true
-        default: "internal"
+        default: "direct"
         type: choice
         options:
           - direct
           - internal
           - both
+
+      verify:
+        description: "Verify warm"
+        required: true
+        default: true
+        type: boolean
 
       delay:
         description: "Seconds between URLs"
@@ -74,31 +80,36 @@ jobs:
           INPUT_URLS: ${{ inputs.urls }}
         run: |
           python - <<'PY'
-          import os, re
+          import os,re
 
-          text = os.environ.get("INPUT_URLS", "")
-          urls = re.findall(r'https?://\S+', text)
+          text=os.environ.get("INPUT_URLS","")
+          urls=re.findall(r'https?://\S+',text)
 
-          with open("runtime-urls.txt", "w", encoding="utf-8") as f:
+          with open("runtime-urls.txt","w",encoding="utf-8") as f:
               for url in urls:
-                  f.write(url.strip() + "\n")
+                  f.write(url.strip()+"\n")
 
-          print("URL count:", len(urls))
-          for url in urls:
-              print(url)
+          print("URL count:",len(urls))
           PY
 
       - name: Run cache warmer
         shell: bash
         run: |
-          python -u crawler.py \
-            --file runtime-urls.txt \
-            --device "${{ inputs.device }}" \
-            --navigation "${{ inputs.navigation }}" \
-            --auth guest \
-            --delay "${{ inputs.delay }}" \
-            --verify-delay "${{ inputs.verify_delay }}" \
+          ARGS=(
+            --file runtime-urls.txt
+            --device "${{ inputs.device }}"
+            --navigation "${{ inputs.navigation }}"
+            --auth guest
+            --delay "${{ inputs.delay }}"
+            --verify-delay "${{ inputs.verify_delay }}"
             --timeout 60
+          )
+
+          if [ "${{ inputs.verify }}" = "false" ]; then
+            ARGS+=(--no-verify)
+          fi
+
+          python -u crawler.py "${ARGS[@]}"
 
       - name: Upload report
         if: always()
