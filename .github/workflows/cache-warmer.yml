@@ -11,7 +11,7 @@ on:
       device:
         description: "Device cache"
         required: true
-        default: "both"
+        default: "mobile"
         type: choice
         options:
           - both
@@ -21,7 +21,7 @@ on:
       navigation:
         description: "Navigation type"
         required: true
-        default: "direct"
+        default: "internal"
         type: choice
         options:
           - direct
