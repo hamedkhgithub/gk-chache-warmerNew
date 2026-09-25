@@ -21,7 +21,7 @@ on:
       navigation:
         description: "Navigation type"
         required: true
-        default: "direct"
+        default: "internal"
         type: choice
         options:
           - direct
