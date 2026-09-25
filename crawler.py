@@ -88,7 +88,8 @@ def main():
         log("Logged-in cookie: OK (values hidden)")
 
     os.makedirs("logs",exist_ok=True)
-    path="logs/cache-warmer.csv"
+    stamp=datetime.now(timezone.utc).strftime("%Y-%m-%d_%H-%M-%S")
+    path=f"logs/cache-warmer-{stamp}.csv"
     fields=["utc_time","index","auth","device","navigation","url",
             "warm_http","warm_cache","warm_control","warm_seconds",
             "verify_http","verify_cache","verify_control","verify_seconds",
