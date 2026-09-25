@@ -3,37 +3,42 @@ name: GeniusKala Cache Warmer
 on:
   workflow_dispatch:
     inputs:
+      urls:
+        description: "Paste URLs here - one per line"
+        required: true
+        type: string
+
       device:
         description: "Device cache"
         required: true
         default: "both"
         type: choice
-        options: [both, mobile, desktop]
+        options:
+          - both
+          - desktop
+          - mobile
+
       navigation:
         description: "Navigation type"
         required: true
-        default: "both"
+        default: "direct"
         type: choice
-        options: [both, direct, internal]
-      auth:
-        description: "User state"
-        required: true
-        default: "both"
-        type: choice
-        options: [both, guest, logged_in]
+        options:
+          - direct
+          - internal
+          - both
+
       delay:
         description: "Seconds between URLs"
         required: true
-        default: "5"
+        default: "3"
         type: string
+
       verify_delay:
         description: "Seconds before verification"
         required: true
-        default: "2"
+        default: "1"
         type: string
-
-  schedule:
-    - cron: "30 0 * * *"
 
 permissions:
   contents: read
@@ -59,24 +64,24 @@ jobs:
 
       - run: pip install -r requirements.txt
 
-      - name: Run cache warmer
+      - name: Prepare URLs
         shell: bash
         env:
-          GK_LOGIN_COOKIES: ${{ secrets.GK_LOGIN_COOKIES }}
+          INPUT_URLS: ${{ github.event.inputs.urls }}
         run: |
-          DEVICE="${{ github.event.inputs.device || 'both' }}"
-          NAVIGATION="${{ github.event.inputs.navigation || 'both' }}"
-          AUTH="${{ github.event.inputs.auth || 'guest' }}"
-          DELAY="${{ github.event.inputs.delay || '5' }}"
-          VERIFY_DELAY="${{ github.event.inputs.verify_delay || '2' }}"
+          printf '%s\n' "$INPUT_URLS" > runtime-urls.txt
+          echo "URL count: $(grep -cvE '^[[:space:]]*(#|$)' runtime-urls.txt)"
 
+      - name: Run cache warmer
+        shell: bash
+        run: |
           python -u crawler.py \
-            --file urls.txt \
-            --device "$DEVICE" \
-            --navigation "$NAVIGATION" \
-            --auth "$AUTH" \
-            --delay "$DELAY" \
-            --verify-delay "$VERIFY_DELAY" \
+            --file runtime-urls.txt \
+            --device "${{ github.event.inputs.device }}" \
+            --navigation "${{ github.event.inputs.navigation }}" \
+            --auth guest \
+            --delay "${{ github.event.inputs.delay }}" \
+            --verify-delay "${{ github.event.inputs.verify_delay }}" \
             --timeout 60
 
       - name: Upload report
